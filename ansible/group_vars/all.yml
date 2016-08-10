@@ -96,6 +96,9 @@ dns_setup: true
 # How many replicas in the Replication Controller
 dns_replicas: 1
 
+# Cloud provider
+kube_cloud_provider: gce
+
 # There are other variable in roles/kubernetes/defaults/main.yml but changing
 # them comes with a much higher risk to your cluster. So proceed over there
 # with caution.
