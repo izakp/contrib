@@ -4,7 +4,7 @@
     - nodes
     - etcd
 
-  become: yes
+  sudo: yes
 
   tasks:
     - name: Detecting Operating System
@@ -154,16 +154,16 @@
       command: systemctl daemon-reload
 
 - hosts: nodes
-  become: yes
+  sudo: yes
   tasks:
     - name: restart docker
       service: name=docker state=restarted
 
-- hosts:
+- hosts: 
     - masters
     - nodes
-    - etcd
-  become: yes
+    - etcd 
+  sudo: yes
   tasks:
     - name: CoreOS | unbootstrap python
       raw: rm -r {{ item }}

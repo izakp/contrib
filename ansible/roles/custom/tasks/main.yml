@@ -1,0 +1,4 @@
+---
+- name: Stop kube-addons
+  service: name=kube-addons state=stopped
+  when: cluster_role == "master"

@@ -110,7 +110,7 @@ kube-node-2                : ok=128  changed=39   unreachable=0    failed=0
 
 Login to the Kubernetes master:
 ```
-vagrant ssh kube-master
+vagrant ssh kube-master-1
 ```
 
 Verify the Kuberenetes cluster is up:
@@ -138,39 +138,10 @@ Vagrant tries to be intelligent and pick the first provider supported by your in
 # virtualbox provider
 vagrant up --provider=virtualbox
 
-# openstack provider
-vagrant up --provider=openstack
-
-# libvirt provider
-vagrant up --provider=libvirt
-```
-
-### OpenStack
-Make sure you installed the openstack provider for vagrant.
-```
-vagrant plugin install vagrant-openstack-provider --plugin-version ">= 0.6.1"
-```
-NOTE This is a more up-to-date provider than the similar  `vagrant-openstack-plugin`.
-
-Also note that current (required) versions of `vagrant-openstack-provider` are not compatible with ruby 2.2.
-https://github.com/ggiamarchi/vagrant-openstack-provider/pull/237
-So make sure you get at least version 0.6.1.
-
-To use the vagrant openstack provider you will need
-- Copy `openstack_config.yml.example` to `openstack_config.yml`
-- Edit `openstack_config.yml` to include your relevant details.
-
-###### Libvirt
-
-The libvirt vagrant provider is non-deterministic when launching VMs. This is a problem as we need ansible to only run after all of the VMs are running. To solve this when using libvirt one must
-do the following
-```
-vagrant up --no-provision
-vagrant provision
 ```
 
 ### VirtualBox
-Nothing special should be required for the VirtualBox provisioner. `vagrant up --provider virtualbox` should just work.
+Nothing special should be required for the VirtualBox provisioner. `vagrant up` should just work.
 
 
 ## Additional Information

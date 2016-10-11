@@ -7,9 +7,12 @@ metadata:
     k8s-app: kibana-logging
     kubernetes.io/cluster-service: "true"
     kubernetes.io/name: "Kibana"
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
 spec:
+  type: LoadBalancer
   ports:
-  - port: 5601
+  - port: 80
     protocol: TCP
     targetPort: ui
   selector:

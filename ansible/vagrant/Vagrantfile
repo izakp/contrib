@@ -5,9 +5,9 @@ require "yaml"
 ### This is a new provider, different then cloudbau's.
 ### RUN: vagrant plugin uninstall vagrant-openstack-plugin"
 ### Then RUN: "vagrant plugin install vagrant-openstack-provider"
-require 'vagrant-openstack-provider'
+# require 'vagrant-openstack-provider'
 
-require 'vagrant-aws'
+# require 'vagrant-aws'
 
 $num_nodes = (ENV['NUM_NODES'] || 2).to_i
 $num_masters = (ENV['NUM_MASTERS'] || 1).to_i
@@ -18,7 +18,7 @@ $ansible_tags = ENV['ANSIBLE_TAGS']
 # - "fedora" on openstack, libvirt, virtualbox
 # - "fedoraatomic" on openstack, libvirt, virtualbox
 # - "coreos" on virtualbox
-$os_image = (ENV['OS_IMAGE'] || "centos7").to_sym
+$os_image = (ENV['OS_IMAGE'] || "coreos").to_sym
 
 $coreos_update_channel = "stable"
 $coreos_image_version = "current"
@@ -41,18 +41,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # This explicitly sets the order that vagrant will use by default if no --provider given
   config.vm.provider "virtualbox"
-  config.vm.provider "libvirt"
-  config.vm.provider "aws"
-  config.vm.provider "openstack"
-
-  def set_openstack_box(config)
-    case $os_image
-    when :centos7
-      # common config
-      config.vm.box = "dummy"
-      config.vm.box_url = "https://github.com/cloudbau/vagrant-openstack-plugin/raw/master/dummy.box"
-    end
-  end
 
   def set_vbox_box(config)
     case $os_image
@@ -74,57 +62,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
   end
 
-  def set_libvirt_box(config)
-    case $os_image
-    when :centos7
-      config.vm.box = "centos/7"
-    when :centosatomic
-      config.vm.box = "centos/atomic-host"
-    when :fedora
-      config.vm.box = "fedora/23-cloud-base"
-    when :fedoraatomic
-      config.vm.box = "fedora/23-atomic-host"
-    end
-  end
-
-  def set_aws_box(config)
-    case $os_image
-    when :centos7
-      config.vm.box = "dummy"
-      config.vm.box_url = "https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"
-    end
-  end
-
-  def set_openstack(os, config, n)
-    set_openstack_box(config)
-
-    # this crap is to make it not fail if the file doesn't exist (which is ok if we are using a different provisioner)
-    __filename = File.join(File.dirname(__FILE__), "openstack_config.yml")
-    if File.exist?(__filename)
-      _config = YAML.load(File.open(__filename, File::RDONLY).read)
-    else
-      _config = Hash.new("")
-      _config['security_group'] = []
-    end
-
-    config.ssh.username = "fedora"
-    config.ssh.private_key_path = "~/.ssh/id_rsa"
-    config.vm.boot_timeout = 60*10
-
-    ### The below parameters need to be modified per your openstack instance.
-    os.username         = _config['os_username']
-    os.password         = _config['os_password']
-    os.tenant_name      = _config['os_tenant']
-    os.keypair_name     = _config['os_ssh_key_name']
-    os.openstack_auth_url = _config['os_auth_url']
-    os.region           = _config['os_region_name']
-    os.floating_ip_pool = _config['os_floating_ip_pool']
-    os.flavor           = _config['os_flavor']
-    os.image            = _config['os_image']
-    os.security_groups  = _config['os_security_groups']
-    os.server_name = n.vm.hostname
-  end
-
   def set_vbox(vb, config, vm_idx)
     set_vbox_box(config)
 
@@ -138,42 +75,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     vb.customize ["modifyvm", :id, "--nictype2", "virtio"]
   end
 
-  def set_libvirt(lv, config)
-    set_libvirt_box(config)
-
-    lv.memory = 2048
-    lv.cpus = 2
-    lv.nested = true
-    lv.volume_cache = 'none'
-  end
-
-  def set_aws(aws, config, n)
-    set_aws_box(config)
-
-    config.ssh.username = "YOUR IMAGE UNAME"
-    config.ssh.private_key_path = "PATH TO YOUR KEY"
-
-    ### The below parameters need to be modified per your aws acct
-    aws.access_key_id = "YOUR KEY"
-    aws.secret_access_key = "YOUR SECRET KEY"
-    aws.session_token = "SESSION TOKEN"
-    aws.keypair_name = "KEYPAIR NAME"
-    aws.ami = "YOUR AMI"
-    aws.region = "YOUR REGION"
-  end
-
   def set_provider(n, vm_idx)
-    n.vm.provider :openstack do |os, override|
-      set_openstack(os, override, n)
-    end
     n.vm.provider :virtualbox do |vb, override|
       set_vbox(vb, override, vm_idx)
-    end
-    n.vm.provider :libvirt do |lv, override|
-      set_libvirt(lv, override)
-    end
-     n.vm.provider :aws do |aws, override|
-      set_aws(aws, override, n)
     end
   end
 
@@ -222,24 +126,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   def run_ansible_provision(n)
-    n.vm.provider :openstack do |os, override|
-      override.vm.provision :ansible do |ansible|
-        yield ansible, :openstack
-      end
-    end
     n.vm.provider :virtualbox do |vb, override|
       override.vm.provision :ansible do |ansible|
         yield ansible, :virtualbox
-      end
-    end
-    n.vm.provider :libvirt do |lv, override|
-      override.vm.provision :ansible do |ansible|
-        yield ansible, :libvirt
-      end
-    end
-    n.vm.provider :aws do |aws, override|
-      override.vm.provision :ansible do |ansible|
-        yield ansible, :aws
       end
     end
   end

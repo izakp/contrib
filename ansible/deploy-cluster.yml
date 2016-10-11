@@ -4,15 +4,22 @@
 
 - hosts: all
   gather_facts: false
-  become: yes
+  sudo: yes
   roles:
     - pre-ansible
   tags:
     - pre-ansible
 
+- hosts: all
+  sudo: yes
+  roles:
+    - prepare-hosts
+  tags:
+    - prepare-hosts
+
 # Install etcd
 - hosts: etcd
-  become: yes
+  sudo: yes
   roles:
     - etcd
   tags:
@@ -20,7 +27,7 @@
 
 # Install docker
 - hosts: all
-  become: yes
+  sudo: yes
   roles:
     - common
     - docker
@@ -31,7 +38,7 @@
 - hosts:
     - masters
     - nodes
-  become: yes
+  sudo: yes
   roles:
     - { role: flannel, when: networking == 'flannel' }
   tags:
@@ -39,7 +46,7 @@
 
 # install opencontrail
 - hosts: all
-  become: yes
+  sudo: yes
   roles:
     - { role: opencontrail, when: networking == 'opencontrail'}
   tags:
@@ -47,13 +54,13 @@
 
 # install contiv netmaster
 - hosts: masters
-  become: yes
+  sudo: yes
   roles:
     - { role: contiv, contiv_role: netmaster, when: networking == 'contiv' }
 
 # install kube master services
 - hosts: masters
-  become: yes
+  sudo: yes
   roles:
     - master
   tags:
@@ -61,7 +68,7 @@
 
 # launch addons, like dns
 - hosts: masters
-  become: yes
+  sudo: yes
   roles:
     - kubernetes-addons
   tags:
@@ -70,7 +77,7 @@
 
 # install kubernetes on the nodes
 - hosts: nodes
-  become: yes
+  sudo: yes
   roles:
     - node
   tags:
@@ -80,7 +87,7 @@
 - hosts:
     - masters[0]
     - nodes
-  become: yes
+  sudo: yes
   roles:
     - { role: opencontrail-provision, when: networking == 'opencontrail' }
   tags:
@@ -88,14 +95,20 @@
 
 # install contiv netplugin
 - hosts: nodes
-  become: yes
+  sudo: yes
   roles:
     - { role: contiv, contiv_role: netplugin, when: networking == 'contiv' }
 
 # install runtime dependencies
 - hosts: nodes
-  become: yes
+  sudo: yes
   roles:
   - epilogue
   tags:
   - epilogue
+
+# deploy custom config
+- hosts: all
+  sudo: yes
+  roles:
+    - custom

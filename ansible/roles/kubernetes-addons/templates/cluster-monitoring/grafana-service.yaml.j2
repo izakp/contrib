@@ -6,11 +6,13 @@ metadata:
   labels: 
     kubernetes.io/cluster-service: "true"
     kubernetes.io/name: "Grafana"
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
 spec:
   # On production clusters, consider setting up auth for grafana, and
   # exposing Grafana either using a LoadBalancer or a public IP.
-  # type: LoadBalancer
-  ports: 
+  type: LoadBalancer
+  ports:
     - port: 80
       targetPort: 3000
   selector: 

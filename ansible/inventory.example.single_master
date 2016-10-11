@@ -1,6 +1,8 @@
-
 [masters]
 kube-master-test-01.example.com
+
+[masters:vars]
+cluster_role=master
 
 [etcd]
 kube-master-test-01.example.com
@@ -8,3 +10,13 @@ kube-master-test-01.example.com
 [nodes]
 kube-minion-test-01.example.com
 kube-minion-test-02.example.com
+
+[nodes:vars]
+cluster_role=node
+
+[kube-cluster:children]
+nodes
+masters
+
+[kube-cluster:vars]
+cluster_environment=production

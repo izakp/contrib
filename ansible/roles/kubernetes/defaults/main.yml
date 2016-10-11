@@ -1,5 +1,5 @@
 # Version of Kubernetes binaries
-kube_version: 1.2.4
+kube_version: 1.4.0
 
 # The port that the Kubernetes apiserver component listens on.
 kube_master_api_port: 443
@@ -37,7 +37,7 @@ kube_current_release_directory: "{{ kube_releases_directory }}/{{ kube_version }
 kube_cert_dir: "{{ kube_config_dir }}/certs"
 
 # The IP(s) for which the certificate will be valid
-kube_cert_ip: "{{ hostvars[inventory_hostname]['ansible_all_ipv4_addresses'] | join (',IP:') }}"
+kube_cert_ip: "{{ hostvars[inventory_hostname]['ansible_all_ipv4_addresses'] | join (',IP:') }},IP:{{ hostvars[inventory_hostname]['ansible_ec2_public_ipv4'] }}"
 
 # This is where all of the bearer tokens will be stored
 kube_token_dir: "{{ kube_config_dir }}/tokens"
